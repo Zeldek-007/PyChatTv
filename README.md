@@ -1,2 +1,2 @@
 # PyChatTv
-Python3 Chat Display For Twitch Utilizing Helix API
+Python3 Chat Display
