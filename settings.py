@@ -1,13 +1,17 @@
 #!/usr/bin/python3
 
+#CHANNEL SETTINGS
+#channel = "Zeldek"
+#TEST
+channel="Fr33man"
+URL =  f"https://api.twitch.tv/kraken/chat/{channel}/rooms"
+
 #CHAT SETTINGS#
 
 fontSizeID = 12         #Font size of the usernames in the chat.
 fontTypeID = "Times New Roman"         
 fontSizeMessage = 12    #Font size of the messaging in the chat.
 fontTypeMessage = "Times New Roman"
-fontSizeTimestamp = 12  #Font size of the timestamps in the chat.
-fontTypeTimestamp = "Times New Roman"
 
 refreshTime = 1         #Time to wait before seeking new chat messages. 
                         #1=1 second. Accepts decimal increments.

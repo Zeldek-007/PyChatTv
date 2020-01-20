@@ -1,99 +1,160 @@
 #!/usr/bin/python3
 
-#####   TKINTER   #####
-import tkinter as tk ; import tkinter.ttk as ttk
 #####    TIME     #####
 import time
 #####   DEV ENV   #####
 from env import *
-
+######
+from settings import channel , filterWholeMessage
 #NET
 import socket
-import requests
+#TK
+import tkinter as tk ; import tkinter.ttk as ttk
+#RANDOMIZATION
+import random
+
 
 sock = socket.socket()
 sock.connect((server,port))
 
-#This is the one part of the code I don't understand so far. I mean, I get what it's doing ; I just don't understand the syntax of the string it's sending.
+#Initialize the program to authenticate itself as a user and then join a chatroom.
 sock.send(f"PASS {token}\n".encode('utf-8'))
 sock.send(f"NICK {nickname}\n".encode('utf-8'))
 sock.send(f"JOIN #{channel}\n".encode('utf-8'))
 
+#TEST
+#Let's see if I can ask for the rooms.
+#UPDATE:    MUST PROVIDE AUTHENTICATION WITH REQUEST I THINK?
+import requests
+contents = requests.get(f"https://api.twitch.tv/kraken/chat/{channel}/rooms")
+print(contents)
+
+
 #Originally resp as per tutorial I'm working off of. :P     #Test message, really.
 response = sock.recv(2048).decode('utf-8')
+#DEBUG  #Initial response is outside the loop so that it can be thrown away.
 print(response)
 
-#:ixw1234!ixw1234@ixw1234.tmi.twitch.tv PRIVMSG #roninpawn :gotta import copy
-'''
-def send(self, chan, msg):
-    self.irc.send("PRIVMSG " + chan + " :" + msg + "\n")
 
-'''
 
-def connect():
-    rooms = requests.get(url=URL)
-    print(rooms)
 
 def send(message):
     sent = sock.send(f"PRIVMSG #{channel} :{message}\n".encode('utf-8'))
     print(sent)
 
-#connect()
-send("now imagine this code without any comments")
 
+
+#send('test from bot')
+'''
 while True:
     response = sock.recv(2048).decode('utf-8')
     print(response)
 
 response = sock.recv(2048).decode('utf-8')
 print(response)
-
-
-######
-
-#from settings import *
-
-
+'''
 
 #--------#  #--------#  #--------#  #--------#  #--------#  #--------#  #--------#
 
-#Create root window.
+#
+
 root = tk.Tk()
 
-#Create the chatbox.
-chat = tk.Text(root)
+class Interpeter(tk.Text):
 
+    def __init__(self,filterList:list=["abcdefg"]):
 
-#Username of the streamer.
-streamerID = channel
-#Username a chat message belongs to.
-chattingID = "SomeRando"
-#Content of a message.
-messageTxt = "Hello, world!"
-#Timestamp of a message.
-postedTime = "00:00:00"
+            self.filterList:list = filterList
+            self.latestusername = None
+            self.latestMessage  = None
+            #Create a dictionary holding username:color combos.
+            self.colorKey:dict  = []
 
+            super().__init__(root)
 
-#Create a dictionary holding username:color combos.
-
-class Interpeter():
-
-    def interpret(self):
+    def listen(self):
 
         #Receive a message from Twitch IRC chat.
         message = sock.recv(2048).decode('utf-8')
-        #Check if Twitch has sent us a ping.
-        if message == "PING :tmi.twitch.tv":
+        print(f"Initial message received was {message}")
+        #Check if Twitch has sent us a ping : respond with PONG!
+        if message == "PING :tmi.twitch.tv\r\n":
             sock.send("PONG :tmi.twitch.tv".encode('utf-8'))
-        #Check if the received message needs filtering.
-        elif True:
-            pass
+            #DEBUG
+            print("PONGED TWITCH!!!")
+            return False#Initial response is outside the loop so that it can be thrown away.
+        return message
+    
+    def format(self,string:str):
+        
+        #Separate the received string into a message and an ID, both mangled.
+        #Then, repair them.
+        splitUp  = string.split("!")
+        username = splitUp[0][1:]
+        message = ( splitUp[1].split(":")[1] )
+
+        return [username,message]
+        
+    
+    def filterMessage(self,message:str,fullCensor:bool):
+        
+        for word in self.filterList:
+            if word in message:
+                if fullCensor:
+                    message = "***"
+                    break
+                else:
+                    message = message.replace(word,"***")
+        
+        return message
+    
+    #FOR TESTING, CURRENTLY ONLY RETURNS WHITE
+    def randomHexColor(self):
+        color = 0xFFFFFF
+        return color
+
+    #Call in tk.after()
+    def loop(self):
+
+        while True:
+
+            reception = self.listen()
+
+            #DEBUG
+            print(reception)
+
+            if reception != False:
+                username_and_message = self.format(reception)
+                username = username_and_message[0]
+                message = username_and_message[1]
+                message = self.filterMessage(message,filterWholeMessage)
+
+                if username not in self.colorKey:
+                    #self.colorKey[username] = self.randomHexColor()
+                    pass
+                
+                #DEBUG
+                print(f"{username} : {message}")
+    
+
+                
+
+                 
 
 
-    def __init__(self):
-        pass
+
+#
+
+DevInterpreter = Interpeter()
+
+
+DevInterpreter.loop()
+
+#root.after(1000,DevInterpreter.loop)
+
+root.mainloop()
+
+            
+
 
 #####   -------   #####
-
-
-#root.mainloop()
