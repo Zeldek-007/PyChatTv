@@ -13,21 +13,15 @@ import tkinter as tk ; import tkinter.ttk as ttk
 #RANDOMIZATION
 import random
 
-
 sock = socket.socket()
 sock.connect((server,port))
 
-#Initialize the program to authenticate itself as a user and then join a chatroom.
+#Initialize the program to authenticate itself as a user and then join
+# #chatroom.
 sock.send(f"PASS {token}\n".encode('utf-8'))
 sock.send(f"NICK {nickname}\n".encode('utf-8'))
 sock.send(f"JOIN #{channel}\n".encode('utf-8'))
 
-#TEST
-#Let's see if I can ask for the rooms.
-#UPDATE:    MUST PROVIDE AUTHENTICATION WITH REQUEST I THINK?
-import requests
-contents = requests.get(f"https://api.twitch.tv/kraken/chat/{channel}/rooms")
-print(contents)
 
 
 #Originally resp as per tutorial I'm working off of. :P     #Test message, really.
@@ -36,28 +30,12 @@ response = sock.recv(2048).decode('utf-8')
 print(response)
 
 
-
-
 def send(message):
     sent = sock.send(f"PRIVMSG #{channel} :{message}\n".encode('utf-8'))
-    print(sent)
+    #print(sent)
 
-
-
-#send('test from bot')
-'''
-while True:
-    response = sock.recv(2048).decode('utf-8')
-    print(response)
-
-response = sock.recv(2048).decode('utf-8')
-print(response)
-'''
 
 #--------#  #--------#  #--------#  #--------#  #--------#  #--------#  #--------#
-
-#
-
 root = tk.Tk()
 
 class Interpeter(tk.Text):
@@ -76,22 +54,27 @@ class Interpeter(tk.Text):
 
         #Receive a message from Twitch IRC chat.
         message = sock.recv(2048).decode('utf-8')
-        print(f"Initial message received was {message}")
+        #DEBUG
+        #print(f"Initial message received was {message}")
         #Check if Twitch has sent us a ping : respond with PONG!
         if message == "PING :tmi.twitch.tv\r\n":
             sock.send("PONG :tmi.twitch.tv".encode('utf-8'))
             #DEBUG
-            print("PONGED TWITCH!!!")
-            return False#Initial response is outside the loop so that it can be thrown away.
+            #print("PONGED TWITCH!!!")
+            return False
+        elif message == "":
+            return False    #Handle occasional blank string.
         return message
     
     def format(self,string:str):
         
         #Separate the received string into a message and an ID, both mangled.
+        
+        splitUp  = string.split("!",1)    #Split at first occurence of ! only.
         #Then, repair them.
-        splitUp  = string.split("!")
         username = splitUp[0][1:]
-        message = ( splitUp[1].split(":")[1] )
+        #Split at first occurence of : only.
+        message = ( splitUp[1].split(":",1)[1] )
 
         return [username,message]
         
@@ -116,26 +99,26 @@ class Interpeter(tk.Text):
     #Call in tk.after()
     def loop(self):
 
-        while True:
+        reception = self.listen()
 
-            reception = self.listen()
+        #DEBUG
+        #print(reception)
 
+        if reception != False:
+            username_and_message = self.format(reception)
+            username = username_and_message[0]
+            message = username_and_message[1]
+            message = self.filterMessage(message,filterWholeMessage)
+
+            if username not in self.colorKey:
+                #self.colorKey[username] = self.randomHexColor()
+                pass
+            
             #DEBUG
-            print(reception)
+            print(f"{username} : {message}")
 
-            if reception != False:
-                username_and_message = self.format(reception)
-                username = username_and_message[0]
-                message = username_and_message[1]
-                message = self.filterMessage(message,filterWholeMessage)
 
-                if username not in self.colorKey:
-                    #self.colorKey[username] = self.randomHexColor()
-                    pass
-                
-                #DEBUG
-                print(f"{username} : {message}")
-    
+        self.loop()
 
                 
 
@@ -146,12 +129,12 @@ class Interpeter(tk.Text):
 #
 
 DevInterpreter = Interpeter()
+DevInterpreter.grid(row=0,column=0)
 
+#DevInterpreter.loop()
 
-DevInterpreter.loop()
-
-#root.after(1000,DevInterpreter.loop)
-
+root.after(1000,DevInterpreter.loop)
+root.title("PyTwitchChat")
 root.mainloop()
 
             

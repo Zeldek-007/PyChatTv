@@ -1,10 +1,10 @@
 #!/usr/bin/python3
 
-#CHANNEL SETTINGS
-#channel = "Zeldek"
+#CHANNEL SETTINGS   #CHANNEL MUST BE LOWERCASE
+#channel = "zeldek"
 #TEST
-channel="Fr33man"
-URL =  f"https://api.twitch.tv/kraken/chat/{channel}/rooms"
+channel="fr33maan"
+channel = channel.lower()
 
 #CHAT SETTINGS#
 
