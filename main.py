@@ -26,8 +26,6 @@ sock.send(f"JOIN #{channel}\n".encode('utf-8'))
 
 #Dump the first two Twitch messages, which don't need to be shown.
 response = sock.recv(2048).decode('utf-8')
-response = sock.recv(2048).decode('utf-8')
-response = sock.recv(2048).decode('utf-8')
 #DEBUG  #Initial response is outside the loop so that it can be thrown away.
 #print(response)
 
@@ -52,22 +50,23 @@ class Interpeter(tk.Text):
             self.colorKey:dict  = []
 
             #Init as child Text of root window.
-            super().__init__(root)
+            super().__init__(root,wrap="word")
 
     def listen(self):
 
         #Receive a message from Twitch IRC chat.
         message = sock.recv(2048).decode('utf-8')
         #DEBUG
-        #print(f"Initial message received was {message}")
+        print(f"Initial message received was \n {message}")
         #Check if Twitch has sent us a ping : respond with PONG!
         if message == "PING :tmi.twitch.tv\r\n":
             sock.send("PONG :tmi.twitch.tv".encode('utf-8'))
             #DEBUG
             print("PONGED TWITCH!!!")
             return False
-        elif message == "" or message == "\n" or message == "\r" or message == "\r\n":
-            return False    #Handle occasional blank string.
+        #Get rid of garbage.
+        elif message == "" or message == "\n" or message == "\r" or message == "\r\n" or message == " ":
+            return False
         return message
     
     def format(self,string:str):
@@ -122,20 +121,19 @@ class Interpeter(tk.Text):
             #DEBUG
             print(f"{username} : {message}")
 
-            #ADD USERNAME : MESSAGE to labeling.
+            #Clean the log to make space.
+            self.delete(1.0,tk.END)
+
+            #ADD USERNAME : MESSAGE to Textbox.
             self.insert(tk.END,f"{username} : {message}\n")
+
+            
 
 
         #Loop into self.
         root.after(REFRESH_TIME,self.loop)
 
-                
-
-                 
-
-
-
-#
+#DEW IT
 
 DevInterpreter = Interpeter()
 DevInterpreter.grid(row=0,column=0)
@@ -143,8 +141,3 @@ DevInterpreter.grid(row=0,column=0)
 root.after(REFRESH_TIME,DevInterpreter.loop)
 root.title(f"PyTwitchChat: {channel}")
 root.mainloop()
-
-            
-
-
-#####   -------   #####
