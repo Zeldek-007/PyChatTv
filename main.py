@@ -5,7 +5,7 @@ import time
 #####   DEV ENV   #####
 from env import *
 ######
-from settings import channel , filterWholeMessage
+from settings import channel , filterWholeMessage , REFRESH_TIME
 #NET
 import socket
 #TK
@@ -24,16 +24,20 @@ sock.send(f"JOIN #{channel}\n".encode('utf-8'))
 
 
 
-#Originally resp as per tutorial I'm working off of. :P     #Test message, really.
+#Dump the first two Twitch messages, which don't need to be shown.
+response = sock.recv(2048).decode('utf-8')
+response = sock.recv(2048).decode('utf-8')
 response = sock.recv(2048).decode('utf-8')
 #DEBUG  #Initial response is outside the loop so that it can be thrown away.
-print(response)
+#print(response)
 
+'''
+UNUSED
 
 def send(message):
     sent = sock.send(f"PRIVMSG #{channel} :{message}\n".encode('utf-8'))
     #print(sent)
-
+'''
 
 #--------#  #--------#  #--------#  #--------#  #--------#  #--------#  #--------#
 root = tk.Tk()
@@ -42,12 +46,12 @@ class Interpeter(tk.Text):
 
     def __init__(self,filterList:list=["abcdefg"]):
 
+            #Bad word list.
             self.filterList:list = filterList
-            self.latestusername = None
-            self.latestMessage  = None
             #Create a dictionary holding username:color combos.
             self.colorKey:dict  = []
 
+            #Init as child Text of root window.
             super().__init__(root)
 
     def listen(self):
@@ -60,9 +64,9 @@ class Interpeter(tk.Text):
         if message == "PING :tmi.twitch.tv\r\n":
             sock.send("PONG :tmi.twitch.tv".encode('utf-8'))
             #DEBUG
-            #print("PONGED TWITCH!!!")
+            print("PONGED TWITCH!!!")
             return False
-        elif message == "":
+        elif message == "" or message == "\n" or message == "\r" or message == "\r\n":
             return False    #Handle occasional blank string.
         return message
     
@@ -104,6 +108,7 @@ class Interpeter(tk.Text):
         #DEBUG
         #print(reception)
 
+        #If we received a proper message, format and filter it.
         if reception != False:
             username_and_message = self.format(reception)
             username = username_and_message[0]
@@ -117,8 +122,12 @@ class Interpeter(tk.Text):
             #DEBUG
             print(f"{username} : {message}")
 
+            #ADD USERNAME : MESSAGE to labeling.
+            self.insert(tk.END,f"{username} : {message}\n")
 
-        self.loop()
+
+        #Loop into self.
+        root.after(REFRESH_TIME,self.loop)
 
                 
 
@@ -131,10 +140,8 @@ class Interpeter(tk.Text):
 DevInterpreter = Interpeter()
 DevInterpreter.grid(row=0,column=0)
 
-#DevInterpreter.loop()
-
-root.after(1000,DevInterpreter.loop)
-root.title("PyTwitchChat")
+root.after(REFRESH_TIME,DevInterpreter.loop)
+root.title(f"PyTwitchChat: {channel}")
 root.mainloop()
 
             
