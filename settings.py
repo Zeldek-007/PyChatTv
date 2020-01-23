@@ -3,7 +3,7 @@
 #CHANNEL SETTINGS   #CHANNEL MUST BE LOWERCASE
 #channel = "zeldek"
 #TEST
-channel="fr33maan"
+channel="VapeJuiceJordan"
 channel = channel.lower()
 
 #CHAT SETTINGS#
@@ -13,8 +13,8 @@ fontTypeID = "Times New Roman"
 fontSizeMessage = 12    #Font size of the messaging in the chat.
 fontTypeMessage = "Times New Roman"
 
-refreshTime = 1         #Time to wait before seeking new chat messages. 
-                        #1=1 second. Accepts decimal increments.
+REFRESH_TIME = 1000         #Time to wait before seeking new chat messages. 
+                        #1000=1 second.
 
 #Add words here to have messages filtered if they contain them.
 badWords = ["foo","bar"]
