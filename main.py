@@ -24,10 +24,8 @@ sock.send(f"JOIN #{channel}\n".encode('utf-8'))
 
 
 
-#Dump the first two Twitch messages, which don't need to be shown.
+#Dump the first one or two Twitch messages, which don't need to be shown.
 response = sock.recv(2048).decode('utf-8')
-#DEBUG  #Initial response is outside the loop so that it can be thrown away.
-#print(response)
 
 '''
 UNUSED
@@ -94,24 +92,17 @@ class Interpeter(tk.Text):
         
         return message
     
-    #FOR TESTING, CURRENTLY ONLY RETURNS WHITE
+    #
     def randomHexColor(self):
         color = random.randint(0x000000,0xFFFFFF)
         color = (str(hex(color)))
         color = "#"+color[2:]
-
-        #DEBUG
-        print(color)
         return color
 
     #Call in tk.after()
     def loop(self):
 
         reception = self.listen()
-
-        #DEBUG
-        #print(reception)
-
         #If we received a proper message, format and filter it.
         if reception != False:
             username_and_message = self.format(reception)
@@ -122,17 +113,9 @@ class Interpeter(tk.Text):
             if username not in self.colorKey:
                 self.tag_config(username,foreground=self.randomHexColor())
             
-            #DEBUG
-            #print(f"{username} : {message}")
-
-
-
             #ADD USERNAME : MESSAGE to Textbox.
             self.insert(tk.END,f"{username} : {message}\n",username)
-
             
-
-
         #Loop into self.
         root.after(REFRESH_TIME,self.loop)
 
