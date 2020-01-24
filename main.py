@@ -47,7 +47,7 @@ class Interpeter(tk.Text):
             #Bad word list.
             self.filterList:list = filterList
             #Create a dictionary holding username:color combos.
-            self.colorKey:dict  = []
+            self.colorKey:dict  = {}
 
             #Init as child Text of root window.
             super().__init__(root,wrap="word")
@@ -57,7 +57,7 @@ class Interpeter(tk.Text):
         #Receive a message from Twitch IRC chat.
         message = sock.recv(2048).decode('utf-8')
         #DEBUG
-        print(f"Initial message received was \n {message}")
+        #print(f"Initial message received was \n {message}")
         #Check if Twitch has sent us a ping : respond with PONG!
         if message == "PING :tmi.twitch.tv\r\n":
             sock.send("PONG :tmi.twitch.tv".encode('utf-8'))
@@ -96,7 +96,12 @@ class Interpeter(tk.Text):
     
     #FOR TESTING, CURRENTLY ONLY RETURNS WHITE
     def randomHexColor(self):
-        color = 0xFFFFFF
+        color = random.randint(0x000000,0xFFFFFF)
+        color = (str(hex(color)))
+        color = "#"+color[2:]
+
+        #DEBUG
+        print(color)
         return color
 
     #Call in tk.after()
@@ -115,17 +120,15 @@ class Interpeter(tk.Text):
             message = self.filterMessage(message,filterWholeMessage)
 
             if username not in self.colorKey:
-                #self.colorKey[username] = self.randomHexColor()
-                pass
+                self.tag_config(username,foreground=self.randomHexColor())
             
             #DEBUG
-            print(f"{username} : {message}")
+            #print(f"{username} : {message}")
 
-            #Clean the log to make space.
-            self.delete(1.0,tk.END)
+
 
             #ADD USERNAME : MESSAGE to Textbox.
-            self.insert(tk.END,f"{username} : {message}\n")
+            self.insert(tk.END,f"{username} : {message}\n",username)
 
             
 
