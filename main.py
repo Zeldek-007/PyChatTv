@@ -109,12 +109,13 @@ class Interpeter(tk.Text):
             username = username_and_message[0]
             message = username_and_message[1]
             message = self.filterMessage(message,filterWholeMessage)
+            message = message[:-2]
 
             if username not in self.colorKey:
                 self.tag_config(username,foreground=self.randomHexColor())
             
             #ADD USERNAME : MESSAGE to Textbox.
-            self.insert(tk.END,f"{username} : {message}\n",username)
+            self.insert(tk.END,f"{username} : {message}\n\n",username)
             
         #Loop into self.
         root.after(REFRESH_TIME,self.loop)

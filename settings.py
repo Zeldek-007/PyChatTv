@@ -3,7 +3,7 @@
 #CHANNEL SETTINGS   #CHANNEL MUST BE LOWERCASE
 #channel = "zeldek"
 #TEST
-channel="roninpawn"
+channel="lana_lux"
 channel = channel.lower()
 
 #CHAT SETTINGS#
